@@ -8,4 +8,7 @@ Configure your own AWS cli profile by running:
 
 ##Running
 
-`pipenv run “python snap/snap.py”` 
+`pipenv run “python snap/snap.py <command> <--group=Group>”` 
+
+*command* start, stop, list
+*group* is optional (EC2's tag = Group) 
