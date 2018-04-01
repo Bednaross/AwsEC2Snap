@@ -1,5 +1,6 @@
 import boto3
 import click
+import botocore
 
 #start session first
 session = boto3.Session(profile_name='Snap')
@@ -7,7 +8,7 @@ ec2 = session.resource('ec2')
 
 
 def filter_instances(group):
-    instances
+    instances = []
     #look for instances with a group tag
     if group:
         filters = [{'Name':'tag:Group', 'Values':[group]}]
@@ -137,7 +138,10 @@ def stop_instances(group):
 
     for i in instances:
         print("Stopping...{0}".format(i.id))
-        i.stop()
+        try:
+            i.stop()
+        except botocore.exceptions.ClientError as e:
+            print("Unable to stop instance {0} ".format(i.id) + str(e))
 
     return
 
@@ -151,7 +155,10 @@ def stop_instances(group):
 
     for i in instances:
         print("Starting...{0}".format(i.id))
-        i.start()
+        try:
+            i.start()
+        except botocore.exceptions.ClientError as e:
+            print("Unable to start instance {0}".format(i.id) + str(e))
 
     return
 
