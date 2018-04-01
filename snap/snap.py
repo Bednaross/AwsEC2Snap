@@ -31,7 +31,9 @@ def snapshots():
 @snapshots.command('list')
 @click.option('--group', default=None,
     help="Only snapshots for given group (instance tag Group:<name>)")
-def get_snapshots_info(group):
+@click.option('--all', 'list_all', default=False, is_flag=True,
+    help="List all snapshots for each volume")
+def get_snapshots_info(group, list_all):
     "This function lists all snapshots for volumes"
     instances= filter_instances(group)
 
@@ -47,7 +49,8 @@ def get_snapshots_info(group):
                         s.progress,
                         s.start_time.strftime("%c")
                     )))
-
+                    #take only last snapshots
+                    if s.state == 'completed' and not list_all: break
     return
 
 
