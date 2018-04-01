@@ -1,12 +1,14 @@
 import boto3
 import click
 
+#start session first
 session = boto3.Session(profile_name='Snap')
 ec2 = session.resource('ec2')
 
 
 def filter_instances(group):
-    instances=[]
+    instances
+    #look for instances with a group tag
     if group:
         filters = [{'Name':'tag:Group', 'Values':[group]}]
         instances = ec2.instances.filter(Filters = filters)
@@ -32,6 +34,7 @@ def get_snapshots_info(group):
     "This function lists all snapshots for volumes"
     instances= filter_instances(group)
 
+    #collect basic info about snapshots
     for i in instances:
             for v in i.volumes.all():
                 for s in v.snapshots.all():
@@ -58,6 +61,7 @@ def volumes():
 def get_volumes_info(group):
     "This function lists all EC2 volumes"
     instances= filter_instances(group)
+    #collect basic info about vol
 
     for i in instances:
         for v in i.volumes.all():
@@ -85,9 +89,20 @@ def create_snapshots(group):
     instances= filter_instances(group)
 
     for i in instances:
+        # before taking snapshots stop instance first
+        print("Stopping {0}...".format(i.id))
+
+        i.stop()
+        i.wait_until_stopped()
+
         for v in i.volumes.all():
             print("Creating snapshot of {0}".format(v.id))
             v.create_snapshot(Description="Created by AwsEC2Snap")
+
+        #start instance
+        print("Starting {0}...".format(i.id))
+        i.start()
+        i.wait_until_running()
 
     return
 
@@ -98,6 +113,8 @@ def create_snapshots(group):
 def get_instances_info(group):
     "This function lists all EC2"
     instances= filter_instances(group)
+
+    #collect basic info about instances
 
     for i in instances:
         tags = {t['Key']: t['Value'] for t in i.tags or [] }
